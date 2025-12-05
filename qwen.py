@@ -13,29 +13,26 @@ model = Qwen3VLForConditionalGeneration.from_pretrained(
 
 processor = AutoProcessor.from_pretrained("Qwen/Qwen3-VL-8B-Instruct")
 
-prompt = '''Your ONLY task: Count the total number of metallic pins on this IC chip.
+prompt = '''Count the pins on this IC chip. Think step-by-step:
 
-WHAT TO COUNT:
-✓ Shiny metallic contacts (silver, gold, copper color)
-✓ Each pin counted ONCE where it touches the IC body
-✓ Pins on 2 sides (left + right) OR 4 sides (top + right + bottom + left)
+Step 1: Identify the package type
+- Look at the chip. Are the metallic pins on 2 sides (left & right only) or 4 sides (all around)?
+- Answer: 
 
-WHAT TO IGNORE:
-✗ Plastic edges (black/dark, not shiny)
-✗ Shadows and reflections
-✗ Text or markings
-✗ Center thermal pad (large square in middle on QFN chips)
-✗ Bevels, corners, mold lines
+Step 2: Count each side individually
+- If 2 sides: Count left side pins, then right side pins
+- If 4 sides: Count top pins, right pins, bottom pins, left pins
+- IMPORTANT: Only count shiny metallic contacts. Skip any large center pad.
+- Left side: 
+- Right side: 
+- Top side (if applicable): 
+- Bottom side (if applicable): 
 
-COUNTING METHOD:
-1. Look at the chip - are pins on 2 sides or 4 sides?
-2. Count each side carefully, one pin at a time
-3. Add up the totals from all sides
-4. Double-check your count
+Step 3: Calculate total
+- Add up all the pins from each side
+- Total = 
 
-Common pin counts: 6, 8, 14, 16, 20, 24, 28, 32, 40, 44, 48, 52, 56, 64, 80, 100
-
-Answer with ONLY the number:'''
+Final answer (number only):'''
 
 # Ground truth values for uncertain/ images
 truth_values = [64, 56, 20, 48, 14, 48, 14, 48, 48, 22, 14]
@@ -77,9 +74,9 @@ for idx, image_path in enumerate(image_files):
     # Inference: Generation of the output with optimized parameters
     generated_ids = model.generate(
         **inputs, 
-        max_new_tokens=10,  # Reduced - we only need a number
+        max_new_tokens=150,  # Need more tokens for reasoning
         do_sample=False,
-        temperature=0.0,  # Most deterministic
+        temperature=0.0,
         num_beams=1,
     )
     generated_ids_trimmed = [
@@ -89,8 +86,18 @@ for idx, image_path in enumerate(image_files):
         generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
     )
     
-    # Get predicted count
-    predicted = output_text[0].strip()
+    # Get predicted count - extract final number from chain-of-thought
+    full_response = output_text[0].strip()
+    
+    # Try to extract the final answer (last number in the response)
+    import re
+    numbers = re.findall(r'\b(\d+)\b', full_response)
+    predicted = numbers[-1] if numbers else "0"
+    
+    # Print full reasoning for debugging
+    print(f"\n{image_path.name}:")
+    print(f"Reasoning: {full_response[:200]}...")  # First 200 chars
+    print(f"Extracted: {predicted}", end="")
     
     # Compare with ground truth
     if idx < len(truth_values):
@@ -102,7 +109,7 @@ for idx, image_path in enumerate(image_files):
             correct += 1
         total += 1
         
-        print(f"{image_path.name}: {predicted} (truth: {ground_truth}) {status}")
+        print(f" (truth: {ground_truth}) {status}")
     else:
         print(f"{image_path.name}: {predicted}")
 
