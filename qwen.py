@@ -31,7 +31,7 @@ Answer with ONLY a number.
 
 Examples of correct answers:
 3
-15
+14
 16
 21
 8
