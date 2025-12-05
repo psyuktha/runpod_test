@@ -12,7 +12,6 @@ from PIL import Image
 import os
 
 load_dotenv()
-
 BASE_URL = os.getenv("LLM_BASE_URL")
 class LLM:
     """Vision API client for analyzing IC chip images."""
@@ -53,15 +52,19 @@ Count each pin once at the point where it connects to the IC body
 Do NOT assume symmetry - only count what you can see
 Do NOT use part numbers or labels to guess the count
 
-Answer with ONLY a number. If uncertain, answer "uncertain".
+Answer with ONLY a number. 
 
 Examples of correct answers:
-8
+3
+15
 16
+21
+8
 28
-uncertain
 
 Your answer:'''
+
+
 
     def compress_image(self, image_path: str) -> bytes:
         """
@@ -238,9 +241,13 @@ Your answer:'''
         response_text = response.text
         result = self._parse_response(response_text)
 
-        return response_text["response"]
+        return result['pin_count']
     
 def main():
+    c=0
+    # truth_values =[64,56,20,48,14,48,14,48,48,22,14]
+    truth_values =[]
+    truth=[]
     llm_client = LLM()
     test_imges=os.listdir("ic_test")
     test_imges.sort()
@@ -251,7 +258,21 @@ def main():
         image_path = os.path.join("ic_test", test_img)  # Replace with your test image path
         result = llm_client.analyze_image(image_path)
         print(image_path,"\n","Analysis Result:", result)
-    
+        if result==str(truth_values[c]):
+            print("Correct")
+            truth.append("Correct")
+        else:
+            print("Incorrect. Truth:",truth_values[c])
+            truth.append("Incorrect")
+
+        print("-----------------------")
+        c+=1
+    print("Final Truth List:",truth)
+    print(truth.count("Correct"),"out of",len(truth))
+    for i in range(len(truth)):
+        if truth[i]=="Incorrect":
+            print(f"Image: {test_imges[i]}, Result: {truth[i]}")
+
     
 if __name__ == "__main__":
     main()
