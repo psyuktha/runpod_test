@@ -246,7 +246,7 @@ Your answer:'''
 def main():
     c=0
     # truth_values =[64,56,20,48,14,48,14,48,48,22,14]
-    truth_values =[]
+    truth_values =[16,3,40,3,10,16,3,3,8,16,16,16]
     truth=[]
     llm_client = LLM()
     test_imges=os.listdir("ic_test")
@@ -273,6 +273,11 @@ def main():
         if truth[i]=="Incorrect":
             print(f"Image: {test_imges[i]}, Result: {truth[i]}")
 
-    
+
+def individual(img_path):
+    llm_client = LLM()
+    result = llm_client.analyze_image(img_path)
+    print("Analysis Result:", result)
 if __name__ == "__main__":
-    main()
+    # main()
+    individual("ic_test/a5.png")
