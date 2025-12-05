@@ -100,7 +100,7 @@ uncertain
 Your answer:'''
 
 # Get all image files from ic_test directory
-ic_test_dir = Path("ic_test")
+ic_test_dir = Path("uncertain")
 image_extensions = {'.png', '.jpg', '.jpeg'}
 image_files = [f for f in ic_test_dir.iterdir() if f.suffix.lower() in image_extensions]
 
