@@ -20,25 +20,27 @@ processor = AutoProcessor.from_pretrained("Qwen/Qwen3-VL-8B-Instruct")
 prompt = '''Count the total number of pins on this IC chip.
 
 INSTRUCTIONS:
-1. Look at the IC package in the image
-2. Count ONLY the metallic pins/contacts (shiny silver/grey metal)
-3. Do NOT count: plastic edges, shadows, text, reflections, or mold marks
-4. Count each pin once at the point where it connects to the IC body
-5. Do NOT assume symmetry - only count what you can see
-6. Do NOT use part numbers or labels to guess the count
+Look at the IC package in the image
+Count ONLY the metallic pins/contacts (shiny silver/grey metal)
+Do NOT count: plastic edges, shadows, text, reflections, or mold marks
+Count each pin once at the point where it connects to the IC body
+Do NOT assume symmetry - only count what you can see
+Do NOT use part numbers or labels to guess the count
 
-Answer with ONLY a number. If uncertain, answer "uncertain".
+Answer with ONLY a number. 
 
 Examples of correct answers:
-8
+3
+15
 16
+21
+8
 28
-uncertain
 
 Your answer:'''
 
 # Get all image files from ic_test directory
-ic_test_dir = Path("ic_test")
+ic_test_dir = Path("uncertain")
 image_extensions = {'.png', '.jpg', '.jpeg'}
 image_files = [f for f in ic_test_dir.iterdir() if f.suffix.lower() in image_extensions]
 
