@@ -1,4 +1,6 @@
 from transformers import Qwen3VLForConditionalGeneration, AutoProcessor
+import os
+from pathlib import Path
 
 # default: Load the model on the available device(s)
 model = Qwen3VLForConditionalGeneration.from_pretrained(
@@ -46,35 +48,45 @@ No text, no explanation, no symbols, no formatting.
 
 Output format:
 <total_pin_count>'''
-messages = [
-    {
-        "role": "user",
-        "content": [
-            {
-                "type": "image",
-                "image": "ic_test/ACS712T.png",
-            },
-            {"type": "text", "text": prompt},
-        ],
-    }
-]
 
-# Preparation for inference
-inputs = processor.apply_chat_template(
-    messages,
-    tokenize=True,
-    add_generation_prompt=True,
-    return_dict=True,
-    return_tensors="pt"
-)
-inputs = inputs.to(model.device)
+# Get all image files from ic_test directory
+ic_test_dir = Path("ic_test")
+image_extensions = {'.png', '.jpg', '.jpeg'}
+image_files = [f for f in ic_test_dir.iterdir() if f.suffix.lower() in image_extensions]
 
-# Inference: Generation of the output
-generated_ids = model.generate(**inputs, max_new_tokens=128)
-generated_ids_trimmed = [
-    out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
-]
-output_text = processor.batch_decode(
-    generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
-)
-print(output_text)
+# Process each image
+for image_path in sorted(image_files):
+    messages = [
+        {
+            "role": "user",
+            "content": [
+                {
+                    "type": "image",
+                    "image": str(image_path),
+                },
+                {"type": "text", "text": prompt},
+            ],
+        }
+    ]
+
+    # Preparation for inference
+    inputs = processor.apply_chat_template(
+        messages,
+        tokenize=True,
+        add_generation_prompt=True,
+        return_dict=True,
+        return_tensors="pt"
+    )
+    inputs = inputs.to(model.device)
+
+    # Inference: Generation of the output
+    generated_ids = model.generate(**inputs, max_new_tokens=128)
+    generated_ids_trimmed = [
+        out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+    ]
+    output_text = processor.batch_decode(
+        generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+    )
+    
+    # Print image name and pin count
+    print(f"{image_path.name}: {output_text[0]}")
