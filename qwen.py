@@ -13,63 +13,29 @@ model = Qwen3VLForConditionalGeneration.from_pretrained(
 
 processor = AutoProcessor.from_pretrained("Qwen/Qwen3-VL-8B-Instruct")
 
-prompt = '''COUNT ONLY THE PINS ON THIS IC CHIP.
+prompt = '''Your ONLY task: Count the total number of metallic pins on this IC chip.
 
-STEP 1 - IDENTIFY WHAT IS A PIN:
-A pin is a METALLIC (shiny silver/gold/copper) electrical contact.
-Look for the distinctive shine of metal - this is your primary indicator.
+WHAT TO COUNT:
+✓ Shiny metallic contacts (silver, gold, copper color)
+✓ Each pin counted ONCE where it touches the IC body
+✓ Pins on 2 sides (left + right) OR 4 sides (top + right + bottom + left)
 
-STEP 2 - IDENTIFY THE PACKAGE LAYOUT:
-Carefully observe WHERE the pins are located:
-- If pins are on ONLY 2 sides (left and right): It's a 2-sided package (DIP/SOIC/TSSOP)
-- If pins are on ALL 4 sides: It's a 4-sided package (QFN/QFP)
-- DO NOT assume 4 sides just because the chip is square - verify pins exist on all sides
+WHAT TO IGNORE:
+✗ Plastic edges (black/dark, not shiny)
+✗ Shadows and reflections
+✗ Text or markings
+✗ Center thermal pad (large square in middle on QFN chips)
+✗ Bevels, corners, mold lines
 
-STEP 3 - COUNT SYSTEMATICALLY:
-For 2-sided packages:
-- Count LEFT side pins one by one
-- Count RIGHT side pins one by one  
-- Total = left + right
+COUNTING METHOD:
+1. Look at the chip - are pins on 2 sides or 4 sides?
+2. Count each side carefully, one pin at a time
+3. Add up the totals from all sides
+4. Double-check your count
 
-For 4-sided packages:
-- Count TOP row (left to right)
-- Count RIGHT column (top to bottom)
-- Count BOTTOM row (right to left)
-- Count LEFT column (bottom to top)
-- Total = top + right + bottom + left
-- CRITICAL: Skip any large center pad (thermal/ground pad)
+Common pin counts: 6, 8, 14, 16, 20, 24, 28, 32, 40, 44, 48, 52, 56, 64, 80, 100
 
-STEP 4 - WHAT NOT TO COUNT:
-❌ Plastic body edges or corners (not metallic)
-❌ Shadows or dark lines (not physical pins)
-❌ Text, numbers, or logos
-❌ Reflections or glare
-❌ The center thermal pad on QFN packages (count only perimeter pins)
-❌ Beveled edges or chamfers
-❌ Mold lines or seams
-
-STEP 5 - COMMON MISTAKES TO AVOID:
-⚠️ DO NOT count each side of a bent pin separately - count it ONCE at the root
-⚠️ DO NOT assume symmetry - count all sides independently
-⚠️ DO NOT double-count corner pins
-⚠️ DO NOT count the same feature twice
-⚠️ DO NOT use the part number to guess - count visually ONLY
-⚠️ DO NOT count what "should be there" - count what YOU SEE
-
-STEP 6 - VERIFY YOUR COUNT:
-- Standard pin counts: 3, 6, 8, 10, 14, 16, 20, 24, 28, 32, 40, 44, 48, 52, 56, 64, 80, 100
-- If your count is unusual (like 13, 19, 37, 63), RECOUNT carefully
-- Make sure you didn't miss a row or count something twice
-
-OUTPUT: 
-Give me ONLY the final total number. No words, no explanation, just the integer.
-
-Examples:
-14
-48
-56
-
-Your count:'''
+Answer with ONLY the number:'''
 
 # Ground truth values for uncertain/ images
 truth_values = [64, 56, 20, 48, 14, 48, 14, 48, 48, 22, 14]
@@ -111,10 +77,10 @@ for idx, image_path in enumerate(image_files):
     # Inference: Generation of the output with optimized parameters
     generated_ids = model.generate(
         **inputs, 
-        max_new_tokens=256,
+        max_new_tokens=10,  # Reduced - we only need a number
         do_sample=False,
-        temperature=0.1,
-        top_p=0.9
+        temperature=0.0,  # Most deterministic
+        num_beams=1,
     )
     generated_ids_trimmed = [
         out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
