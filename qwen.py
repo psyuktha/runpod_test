@@ -13,75 +13,63 @@ model = Qwen3VLForConditionalGeneration.from_pretrained(
 
 processor = AutoProcessor.from_pretrained("Qwen/Qwen3-VL-8B-Instruct")
 
-prompt = '''You are an expert IC package inspector. Your task is to count the exact total number of electrical pins/contacts on the integrated circuit shown in this image.
+prompt = '''COUNT ONLY THE PINS ON THIS IC CHIP.
 
-DEFINITION OF A PIN:
-A pin is any metallic electrical contact point on the IC package, including:
-- Gull-wing or J-lead pins (DIP, SOIC, TSSOP, SSOP)
-- Flat pads on package edges (QFN, LQFN, DFN)
-- Leads extending from all sides (QFP, LQFP, TQFP)
-- Ball grid arrays underneath (BGA, LGA)
-- Through-hole pins (DIP, PGA)
-- Surface mount pads (any SMD package)
+STEP 1 - IDENTIFY WHAT IS A PIN:
+A pin is a METALLIC (shiny silver/gold/copper) electrical contact.
+Look for the distinctive shine of metal - this is your primary indicator.
 
-COUNTING METHODOLOGY:
+STEP 2 - IDENTIFY THE PACKAGE LAYOUT:
+Carefully observe WHERE the pins are located:
+- If pins are on ONLY 2 sides (left and right): It's a 2-sided package (DIP/SOIC/TSSOP)
+- If pins are on ALL 4 sides: It's a 4-sided package (QFN/QFP)
+- DO NOT assume 4 sides just because the chip is square - verify pins exist on all sides
 
-1. PACKAGE TYPE IDENTIFICATION:
-   First, determine what type of package you're looking at:
-   - Two-sided (DIP, SOIC, TSSOP): Pins only on left and right edges
-   - Four-sided (QFN, QFP, LQFP): Pins/pads on all four edges
-   - Grid array (BGA, LGA): Array of balls/pads on the bottom
-   - Power package (TO-220, TO-263, SOT-23): Typically 3-8 pins
+STEP 3 - COUNT SYSTEMATICALLY:
+For 2-sided packages:
+- Count LEFT side pins one by one
+- Count RIGHT side pins one by one  
+- Total = left + right
 
-2. SYSTEMATIC COUNTING BY PACKAGE TYPE:
-   
-   For TWO-SIDED packages:
-   - Count all pins on the LEFT side
-   - Count all pins on the RIGHT side
-   - Total = left + right
-   
-   For FOUR-SIDED packages:
-   - Count TOP edge pins/pads (left to right)
-   - Count RIGHT edge pins/pads (top to bottom)
-   - Count BOTTOM edge pins/pads (right to left)
-   - Count LEFT edge pins/pads (bottom to top)
-   - Total = top + right + bottom + left
-   - IMPORTANT: For QFN/LQFN, ignore the center thermal pad - count only perimeter pads
-   
-   For GRID ARRAY packages:
-   - Count rows × columns of visible balls/pads
-   - If partially visible, count only what you can see
+For 4-sided packages:
+- Count TOP row (left to right)
+- Count RIGHT column (top to bottom)
+- Count BOTTOM row (right to left)
+- Count LEFT column (bottom to top)
+- Total = top + right + bottom + left
+- CRITICAL: Skip any large center pad (thermal/ground pad)
 
-3. CRITICAL RULES:
-   - Count each pin EXACTLY ONCE at its connection point to the package body
-   - A bent pin with multiple segments = 1 pin (count at the root)
-   - Only count METALLIC contacts (silver, gold, copper colored)
-   - DO NOT count: plastic body edges, corners, bevels, chamfers
-   - DO NOT count: text, logos, date codes, part numbers
-   - DO NOT count: shadows, reflections, light artifacts
-   - DO NOT count: mold marks, parting lines, or surface features
-   - DO NOT count: the center thermal/ground pad on QFN packages
-   - DO NOT assume symmetry - some packages have asymmetric pin counts
-   - DO NOT use part numbers to infer pin count - count visually only
+STEP 4 - WHAT NOT TO COUNT:
+❌ Plastic body edges or corners (not metallic)
+❌ Shadows or dark lines (not physical pins)
+❌ Text, numbers, or logos
+❌ Reflections or glare
+❌ The center thermal pad on QFN packages (count only perimeter pins)
+❌ Beveled edges or chamfers
+❌ Mold lines or seams
 
-4. VERIFICATION:
-   - After counting, verify your total makes sense for the package type
-   - Common counts: 3, 6, 8, 14, 16, 20, 24, 28, 32, 40, 44, 48, 64, 80, 100, 144, etc.
-   - If you get an unusual number, recount carefully
+STEP 5 - COMMON MISTAKES TO AVOID:
+⚠️ DO NOT count each side of a bent pin separately - count it ONCE at the root
+⚠️ DO NOT assume symmetry - count all sides independently
+⚠️ DO NOT double-count corner pins
+⚠️ DO NOT count the same feature twice
+⚠️ DO NOT use the part number to guess - count visually ONLY
+⚠️ DO NOT count what "should be there" - count what YOU SEE
 
-5. OUTPUT:
-   Provide ONLY the final integer count. No explanation, no text, just the number.
+STEP 6 - VERIFY YOUR COUNT:
+- Standard pin counts: 3, 6, 8, 10, 14, 16, 20, 24, 28, 32, 40, 44, 48, 52, 56, 64, 80, 100
+- If your count is unusual (like 13, 19, 37, 63), RECOUNT carefully
+- Make sure you didn't miss a row or count something twice
 
-EXAMPLES:
-3
-8
+OUTPUT: 
+Give me ONLY the final total number. No words, no explanation, just the integer.
+
+Examples:
 14
-16
-24
 48
-64
+56
 
-Now count the pins in this image. Your answer:'''
+Your count:'''
 
 # Ground truth values for uncertain/ images
 truth_values = [64, 56, 20, 48, 14, 48, 14, 48, 48, 22, 14]
