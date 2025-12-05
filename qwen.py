@@ -83,13 +83,20 @@ EXAMPLES:
 
 Now count the pins in this image. Your answer:'''
 
-# Get all image files from ic_test directory
-ic_test_dir = Path("ic_test")
+# Ground truth values for uncertain/ images
+truth_values = [64, 56, 20, 48, 14, 48, 14, 48, 48, 22, 14]
+
+# Get all image files from uncertain directory
+ic_test_dir = Path("uncertain")
 image_extensions = {'.png', '.jpg', '.jpeg'}
-image_files = [f for f in ic_test_dir.iterdir() if f.suffix.lower() in image_extensions]
+image_files = sorted([f for f in ic_test_dir.iterdir() if f.suffix.lower() in image_extensions])
+
+# Track results
+correct = 0
+total = 0
 
 # Process each image
-for image_path in sorted(image_files):
+for idx, image_path in enumerate(image_files):
     messages = [
         {
             "role": "user",
@@ -128,5 +135,26 @@ for image_path in sorted(image_files):
         generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
     )
     
-    # Print image name and pin count
-    print(f"{image_path.name}: {output_text[0]}")
+    # Get predicted count
+    predicted = output_text[0].strip()
+    
+    # Compare with ground truth
+    if idx < len(truth_values):
+        ground_truth = truth_values[idx]
+        is_correct = predicted == str(ground_truth)
+        status = "✓" if is_correct else "✗"
+        
+        if is_correct:
+            correct += 1
+        total += 1
+        
+        print(f"{image_path.name}: {predicted} (truth: {ground_truth}) {status}")
+    else:
+        print(f"{image_path.name}: {predicted}")
+
+# Print accuracy summary
+if total > 0:
+    accuracy = (correct / total) * 100
+    print(f"\n{'='*60}")
+    print(f"Results: {correct}/{total} correct ({accuracy:.1f}% accuracy)")
+    print(f"{'='*60}")

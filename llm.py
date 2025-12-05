@@ -245,17 +245,17 @@ Your answer:'''
     
 def main():
     c=0
-    # truth_values =[64,56,20,48,14,48,14,48,48,22,14]
-    truth_values =[16,3,40,3,10,16,3,3,8,16,16,16]
+    truth_values =[64,56,20,48,14,48,14,48,48,22,14]
+    # truth_values =[16,3,40,3,10,16,3,3,8,16,16,16]
     truth=[]
     llm_client = LLM()
-    test_imges=os.listdir("ic_test")
+    test_imges=os.listdir("uncertain")
     test_imges.sort()
     print("Test images:", test_imges)
     for test_img in test_imges:
         if not test_img.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
             continue
-        image_path = os.path.join("ic_test", test_img)  # Replace with your test image path
+        image_path = os.path.join("uncertain", test_img)  # Replace with your test image path
         result = llm_client.analyze_image(image_path)
         print(image_path,"\n","Analysis Result:", result)
         if result==str(truth_values[c]):
