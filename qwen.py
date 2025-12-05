@@ -16,38 +16,68 @@ model = Qwen3VLForConditionalGeneration.from_pretrained(
 # )
 
 processor = AutoProcessor.from_pretrained("Qwen/Qwen3-VL-8B-Instruct")
-prompt = '''You are an expert in all IC package types, especially DIP, SOIC, and TSSOP packages where pins exist only on two opposite long sides.
+prompt = '''You are an expert in IC physical inspection. Your job is to count pins ONLY from the visible physical geometry of the chip—NOT from markings, NOT from part numbers, NOT from common package pin counts, and NOT from inference or guessing.
 
-IMPORTANT:
-Before counting, you MUST correctly identify what is a real pin.
-A real IC pin has ALL of the following characteristics:
-It is metallic in appearance (shiny silver/grey).
-It protrudes outward from the black plastic body.
-It has a consistent rectangular or bent-lead shape.
-It is aligned in a straight row with equal spacing.
-Anything that is NOT metallic (such as plastic bevels, shadows, edges, molding marks, or reflections) must be ignored.
+Your task is to count the TOTAL number of electrical contacts on the IC package in the image. 
+“Pins” includes any type of physical electrical connection:
+- Metal leads on DIP, SOIC, SSOP, TSSOP
+- Pads or leads on QFN, QFP, LQFP
+- Bumps or pads on BGA, LGA, WLCSP, CSP
+- Long pins on PGA
+- Any other physical metallic contact meant for soldering or connection
 
-PACKAGE IDENTIFICATION:
-If the IC has pins only on two opposite long sides (DIP/SOIC/TSSOP), count ONLY those two sides.
-Do NOT assume pins on the top or bottom edges if none are visible.
-Do NOT infer extra pins from shadows or bevels.
+CRITICAL RULES (must follow):
+1. You must count pins ONLY by visually identifying metallic contacts. 
+   - If it is not metallic, do NOT count it.
+   - Ignore text, labels, mold marks, scratches, bevels, and shadows.
 
-COUNTING INSTRUCTIONS:
-Identify the metallic pins on the left side and count ONLY those metallic leads.
-Identify the metallic pins on the right side and count ONLY those metallic leads.
-Total pin count = left-side pins + right-side pins.
+2. Count each pin/contact EXACTLY ONCE at its root:
+   - The “root” is the place where the metal lead or ball touches the IC body.
+   - DO NOT count a lead twice even if it has multiple metal segments (straight + bent foot).
+   - DO NOT count reflections or shadows as pins.
 
-CRITICAL RULES:
-Never count plastic body edges, bevels, or shadows as pins.
-Never count non-metallic shapes.
-Never assume 4 sides of pins unless the image shows actual metallic leads on all sides.
+3. Identify where the pins physically exist:
+   - Two opposite sides (DIP/SOIC/TSSOP style)
+   - Four sides (QFN/QFP style)
+   - Underbody grid (BGA/LGA/WLCSP)
+   - Full pin grid (PGA)
+   - Other or irregular contact layouts
 
-FINAL OUTPUT REQUIREMENT:
-Your final answer must be ONLY the total pin count as a single integer.
-No text, no explanation, no symbols, no formatting.
+4. For perimeter-pin packages (DIP, SOIC, QFN, QFP, etc.):
+   - Count each side separately: top, right, bottom, left.
+   - For each side, count ONLY the number of distinct metallic pin roots.
 
-Output format:
-<total_pin_count>'''
+5. For grid-based packages (BGA, LGA, WLCSP, CSP, PGA):
+   - Count every visible ball/pad/pin.
+   - If the entire grid is not fully visible, count what is visible and specify which areas are cut off.
+
+6. Absolutely NO pin count guessing:
+   - Do NOT use the part number to infer typical pin counts.
+   - Do NOT assume common package sizes like 8, 14, 16, 32, 48, 64, etc.
+   - Do NOT assume symmetry unless the image shows symmetry clearly.
+   - Counterfeit chips may have incorrect markings; ignore text completely.
+
+7. If the number of pins is fully visible, provide the exact total.
+   If any side or part of a grid is not fully visible, do NOT guess—mark it as uncertain.
+
+OUTPUT FORMAT (JSON only):
+{
+  "detected_layout": "<two_sides | four_sides | grid | mixed | unknown>",
+  "pins_per_side": {
+    "top": <integer or null>,
+    "right": <integer or null>,
+    "bottom": <integer or null>,
+    "left": <integer or null>
+  },
+  "grid": {
+    "rows": <integer or null>,
+    "columns": <integer or null>
+  },
+  "total_pins": <integer or null>,
+  "visibility_complete": "<yes | no>",
+  "confidence": "<high | medium | low>",
+  "notes": "<short explanation of what was counted and which areas were unclear>"
+}'''
 
 # Get all image files from ic_test directory
 ic_test_dir = Path("ic_test")
