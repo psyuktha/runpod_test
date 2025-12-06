@@ -1,0 +1,145 @@
+[
+  {
+    "filename": "anu1.jpeg",
+    "predicted": 55,
+    "ground_truth": 64,
+    "correct": false,
+    "error": 9,
+    "package_type": "QFP",
+    "method_results": {
+      "projection": 121,
+      "threshold": 4,
+      "gradient": 55
+    }
+  },
+  {
+    "filename": "anu2.jpeg",
+    "predicted": 56,
+    "ground_truth": 56,
+    "correct": true,
+    "error": 0,
+    "package_type": "QFP",
+    "method_results": {
+      "projection": 127,
+      "threshold": 11,
+      "gradient": 56
+    }
+  },
+  {
+    "filename": "anu3.jpeg",
+    "predicted": 42,
+    "ground_truth": 20,
+    "correct": false,
+    "error": 22,
+    "package_type": "QFP",
+    "method_results": {
+      "projection": 100,
+      "threshold": 25,
+      "gradient": 42
+    }
+  },
+  {
+    "filename": "anu4.jpg",
+    "predicted": 48,
+    "ground_truth": 48,
+    "correct": true,
+    "error": 0,
+    "package_type": "QFP",
+    "method_results": {
+      "projection": 98,
+      "threshold": 1,
+      "gradient": 48
+    }
+  },
+  {
+    "filename": "anu5.jpg",
+    "predicted": 32,
+    "ground_truth": 14,
+    "correct": false,
+    "error": 18,
+    "package_type": "DIP",
+    "method_results": {
+      "projection": 24,
+      "threshold": 14,
+      "gradient": 32
+    }
+  },
+  {
+    "filename": "anu6.png",
+    "predicted": 48,
+    "ground_truth": 48,
+    "correct": true,
+    "error": 0,
+    "package_type": "QFP",
+    "method_results": {
+      "projection": 119,
+      "threshold": 14,
+      "gradient": 48
+    }
+  },
+  {
+    "filename": "new1.png",
+    "predicted": 24,
+    "ground_truth": 14,
+    "correct": false,
+    "error": 10,
+    "package_type": "DIP",
+    "method_results": {
+      "projection": 43,
+      "threshold": 7,
+      "gradient": 24
+    }
+  },
+  {
+    "filename": "new2.png",
+    "predicted": 52,
+    "ground_truth": 48,
+    "correct": false,
+    "error": 4,
+    "package_type": "QFP",
+    "method_results": {
+      "projection": 91,
+      "threshold": 0,
+      "gradient": 52
+    }
+  },
+  {
+    "filename": "new3.png",
+    "predicted": 48,
+    "ground_truth": 48,
+    "correct": true,
+    "error": 0,
+    "package_type": "QFP",
+    "method_results": {
+      "projection": 94,
+      "threshold": 0,
+      "gradient": 48
+    }
+  },
+  {
+    "filename": "new4.png",
+    "predicted": 54,
+    "ground_truth": 22,
+    "correct": false,
+    "error": 32,
+    "package_type": "QFP",
+    "method_results": {
+      "projection": 89,
+      "threshold": 6,
+      "gradient": 54
+    }
+  },
+  {
+    "filename": "new5.png",
+    "predicted": 29,
+    "ground_truth": 14,
+    "correct": false,
+    "error": 15,
+    "package_type": "DIP",
+    "method_results": {
+      "projection": 31,
+      "threshold": 9,
+      "gradient": 29
+    }
+  }
+]

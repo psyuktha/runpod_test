@@ -1,0 +1,34 @@
+
+======================================================================
+IC PIN COUNTING - EVALUATION REPORT
+Generated: 2025-12-06 13:17:48
+======================================================================
+
+SUMMARY STATISTICS:
+  Total images processed: 11
+  Images with ground truth: 11
+  Correct predictions: 4/11
+  Accuracy: 36.4%
+  Mean Absolute Error: 10.00 pins
+  Maximum Error: 32 pins
+
+DETAILED RESULTS:
+----------------------------------------------------------------------
+Filename              Predicted       GT    Error     Status     Type
+----------------------------------------------------------------------
+anu1.jpeg                    55       64        9      WRONG      QFP
+anu2.jpeg                    56       56        0    CORRECT      QFP
+anu3.jpeg                    42       20       22      WRONG      QFP
+anu4.jpg                     48       48        0    CORRECT      QFP
+anu5.jpg                     32       14       18      WRONG      DIP
+anu6.png                     48       48        0    CORRECT      QFP
+new1.png                     24       14       10      WRONG      DIP
+new2.png                     52       48        4      WRONG      QFP
+new3.png                     48       48        0    CORRECT      QFP
+new4.png                     54       22       32      WRONG      QFP
+new5.png                     29       14       15      WRONG      DIP
+----------------------------------------------------------------------
+
+METHOD COMPARISON:
+
+======================================================================
