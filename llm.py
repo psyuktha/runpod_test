@@ -408,4 +408,4 @@ if __name__ == "__main__":
     # individual("•0000000000.png")
     # individual("uncertain/new2.png")
     # individual("retry_img/006.png")
-    main("pin_edges")
+    main("yuktha")
