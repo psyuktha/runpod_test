@@ -111,27 +111,12 @@ def _side_for_pin(
     package_bbox: Tuple[int, int, int, int],
 ) -> str:
     """
-    Classify to an edge using bbox center vs an inset package box:
-    - If center is beyond inset band on an axis, pick that side.
-    - Otherwise fall back to nearest edge distance.
+    Classify to the nearest package edge using bbox center distance.
     """
     px_min, py_min, px_max, py_max = package_bbox
-    pw = px_max - px_min + 1
-    ph = py_max - py_min + 1
-    cx = (pin_bbox[0] + pin_bbox[2]) / 2
-    cy = (pin_bbox[1] + pin_bbox[3]) / 2
-
-    margin_x = 0.05 * pw
-    margin_y = 0.05 * ph
-    if cx <= px_min + margin_x:
-        return "left"
-    if cx >= px_max - margin_x:
-        return "right"
-    if cy <= py_min + margin_y:
-        return "top"
-    if cy >= py_max - margin_y:
-        return "bottom"
-
+    min_x, min_y, max_x, max_y = pin_bbox
+    cx = (min_x + max_x) / 2
+    cy = (min_y + max_y) / 2
     d_top = abs(cy - py_min)
     d_bottom = abs(py_max - cy)
     d_left = abs(cx - px_min)
@@ -228,19 +213,32 @@ def count_pins(
         cx = (bb[0] + bb[2]) / 2
         cy = (bb[1] + bb[3]) / 2
         yellow_side_centers[side].append((cx, cy))
-    yellow_sides_with = sum(1 for s in ("top", "bottom", "left", "right") if yellow_side_counts[s] > 0)
-    yellow_side_scores: Dict[str, float] = {s: _regularity_score(s, yellow_side_centers[s], package_bbox) for s in ("top", "bottom", "left", "right")}
-    best_yellow_side = (
-        min(
-            [s for s in ("top", "bottom", "left", "right") if yellow_side_counts[s] > 0],
-            key=lambda s: (yellow_side_scores[s], -yellow_side_counts[s], s),
+    from collections import Counter
+    counter = Counter(yellow_side_counts.values())
+    if counter.most_common(1)[0][1] > 1:
+        best_yellow_side = counter.most_common(1)[0][0]
+        yellow_sides_with = sum(1 for s in ("top", "bottom", "left", "right") if yellow_side_counts[s] > 0)
+        print(f"Best yellow side: {best_yellow_side}")
+        print(f"Yellow sides with: {yellow_sides_with}")
+        yellow_symmetric_count = best_yellow_side * yellow_sides_with
+        print(f"Yellow symmetric count: {yellow_symmetric_count}")
+    else:
+            
+        
+        yellow_sides_with = sum(1 for s in ("top", "bottom", "left", "right") if yellow_side_counts[s] > 0)
+        yellow_side_scores: Dict[str, float] = {s: _regularity_score(s, yellow_side_centers[s], package_bbox) for s in ("top", "bottom", "left", "right")}
+        best_yellow_side = (
+            min(
+                [s for s in ("top", "bottom", "left", "right") if yellow_side_counts[s] > 0],
+                key=lambda s: (yellow_side_scores[s], -yellow_side_counts[s], s),
+            )
+            if yellow_sides_with
+            else None
         )
-        if yellow_sides_with
-        else None
-    )
-    yellow_symmetric_count = (
-        yellow_side_counts.get(best_yellow_side, 0) * yellow_sides_with if best_yellow_side else 0
-    )
+        yellow_symmetric_count = (
+            yellow_side_counts.get(best_yellow_side, 0) * yellow_sides_with if best_yellow_side else 0
+        )
+    
     # Use the regularity-chosen yellow side for symmetric estimate.
     symmetric_pin_count = yellow_symmetric_count
 
@@ -259,7 +257,7 @@ def count_pins(
         yellow_side_labels,
         yellow_symmetric_count,
         yellow_bboxes,
-        yellow_side_scores,
+        yellow_bboxes,
         best_yellow_side or "unknown",
         yellow_labels,
         yellow_side_centers,
