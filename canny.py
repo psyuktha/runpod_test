@@ -1,16 +1,40 @@
-# =============================================================
-# 📌 CHIP BOUNDARY DETECTION NOTEBOOK (CANNY + CONTOURS)
-# Ready-to-run Colab notebook in a single cell
-# =============================================================
-
-# ---------------------------
-# 🔧 1. Install Dependencies
-# ---------------------------
-
+import os
+import cv2
+import numpy as np
 
 import os
 import cv2
 import numpy as np
+
+def canny_bilateral(directory, save_dir="bi_full"):
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+
+    files = os.listdir(directory)
+    for file in files:
+        img_path = os.path.join(directory, file)
+        img = cv2.imread(img_path)
+        if img is None:
+            print(f"Failed to read {file}")
+            continue
+
+        # Convert to grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        # Apply bilateral filter to smooth while keeping edges
+        smooth = cv2.bilateralFilter(gray, 9, 75, 75)
+
+        # Canny edge detection
+        edges = cv2.Canny(smooth, 40, 120)
+
+        # Optional: dilate edges to make them more prominent
+        kernel = np.ones((2, 2), np.uint8)
+        edges = cv2.dilate(edges, kernel, iterations=1)
+
+        # Save result
+        save_path = os.path.join(save_dir, f"bilateral_canny_{file}")
+        cv2.imwrite(save_path, edges)
+        print(f"Saved: {save_path}")
 
 
 
@@ -44,80 +68,4 @@ def auto_canny(image, sigma=0.5):
     return cv2.Canny(image, lower, upper)
 
 if __name__ == "__main__":
-    canny("uncertain")  # Specify the directory containing test images
-# =============================================================
-# 📌 HIGH-QUALITY IC CANNY EDGE PIPELINE (BEST SETTINGS)
-# =============================================================
-
-# import os
-# import cv2
-# import numpy as np
-
-
-# # ---------------------------
-# # 🔧 1. Batch Canny Function
-# # ---------------------------
-# def canny(directory):
-#     os.makedirs("lemon_chicken", exist_ok=True)
-
-#     files = os.listdir(directory)
-#     for file in files:
-#         if not (file.lower().endswith(".png") or file.lower().endswith(".jpg") or file.lower().endswith(".jpeg")):
-#             continue
-
-#         img_path = os.path.join(directory, file)
-#         img = preprocess_image(img_path)           # IC-optimized preprocessing
-#         final = auto_canny(img)                    # Tuned Canny
-
-#         cv2.imwrite(f"lemon_chicken/canny_{file}", final)
-#         print(f"Saved: canny_{file}")
-
-
-# # ---------------------------
-# # 🧼 2. IC-Optimized Preprocessing
-# # ---------------------------
-# def preprocess_image(img_path):
-#     img = cv2.imread(img_path)
-#     if img is None:
-#         raise ValueError(f"Cannot read image at path: {img_path}")
-
-#     # 1. Grayscale
-#     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-#     # 2. Adaptive contrast enhancement (BEST for pins)
-#     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-#     gray = clahe.apply(gray)
-
-#     # 3. Bilateral filtering (preserves pin edges)
-#     gray = cv2.bilateralFilter(gray, d=9, sigmaColor=75, sigmaSpace=75)
-
-#     # 4. Sharpening to enhance metallic pin edges
-#     kernel = np.array([[0, -1, 0],
-#                        [-1, 5,-1],
-#                        [0, -1, 0]])
-#     gray = cv2.filter2D(gray, -1, kernel)
-
-#     return gray
-
-
-# # ---------------------------
-# # ⚙️ 3. Tuned Canny for IC Images
-# # ---------------------------
-# def auto_canny(image, sigma=0.25):
-#     """
-#     Sigma = 0.25 works BEST for IC pins:
-#       - Captures thin pin edges
-#       - Avoids too much noise
-#     """
-#     med = np.median(image)
-#     lower = int(max(0, (1.0 - sigma) * med))
-#     upper = int(min(255, (1.0 + sigma) * med))
-
-#     return cv2.Canny(image, lower, upper)
-
-
-# # ---------------------------
-# # ▶️ 4. Run
-# # ---------------------------
-# if __name__ == "__main__":
-#     canny("ic_test")   # Put your IC images in /ic_test
+    canny_bilateral("uncertain")  
