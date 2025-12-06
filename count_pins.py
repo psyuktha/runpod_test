@@ -122,7 +122,7 @@ def _side_for_pin(
     pw = px_max - px_min + 1
     ph = py_max - py_min + 1
 
-    strip = max(3, int(0.05 * min(pw, ph)))  # 10% of smaller dim, at least 3px
+    strip = max(3, int(0.02 * min(pw, ph)))  # 10% of smaller dim, at least 3px
 
     if cy <= py_min + strip:
         return "top"

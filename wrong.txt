@@ -3,3 +3,6 @@ b1- imagine issue. 20
 b4- 16 imagine issue
 b6- 20 imagine issue
 b7 - 14 issue
+
+annotate_mask_pins - square
+count_pins - lqfn
