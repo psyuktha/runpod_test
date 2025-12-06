@@ -111,12 +111,29 @@ def _side_for_pin(
     package_bbox: Tuple[int, int, int, int],
 ) -> str:
     """
-    Classify to the nearest package edge using bbox center distance.
+    Classify using extreme edge strips to avoid mixing sides.
+    - If center is within a strip near an edge, assign that edge.
+    - Otherwise, fall back to nearest-edge distance.
     """
     px_min, py_min, px_max, py_max = package_bbox
     min_x, min_y, max_x, max_y = pin_bbox
     cx = (min_x + max_x) / 2
     cy = (min_y + max_y) / 2
+    pw = px_max - px_min + 1
+    ph = py_max - py_min + 1
+
+    strip = max(3, int(0.05 * min(pw, ph)))  # 10% of smaller dim, at least 3px
+
+    if cy <= py_min + strip:
+        return "top"
+    if cy >= py_max - strip:
+        return "bottom"
+    if cx <= px_min + strip:
+        return "left"
+    if cx >= px_max - strip:
+        return "right"
+
+    # Fallback: nearest edge by center distance
     d_top = abs(cy - py_min)
     d_bottom = abs(py_max - cy)
     d_left = abs(cx - px_min)
@@ -223,10 +240,10 @@ def count_pins(
         yellow_symmetric_count = best_yellow_side * yellow_sides_with
         print(f"Yellow symmetric count: {yellow_symmetric_count}")
     else:
-            
-        
         yellow_sides_with = sum(1 for s in ("top", "bottom", "left", "right") if yellow_side_counts[s] > 0)
-        yellow_side_scores: Dict[str, float] = {s: _regularity_score(s, yellow_side_centers[s], package_bbox) for s in ("top", "bottom", "left", "right")}
+        yellow_side_scores: Dict[str, float] = {
+            s: _regularity_score(s, yellow_side_centers[s], package_bbox) for s in ("top", "bottom", "left", "right")
+        }
         best_yellow_side = (
             min(
                 [s for s in ("top", "bottom", "left", "right") if yellow_side_counts[s] > 0],

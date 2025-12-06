@@ -68,4 +68,4 @@ def auto_canny(image, sigma=0.5):
     return cv2.Canny(image, lower, upper)
 
 if __name__ == "__main__":
-    canny_bilateral("uncertain")  
+    canny_bilateral("saturday")  
