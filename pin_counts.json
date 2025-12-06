@@ -1,0 +1,332 @@
+{
+  "bilateral_canny_anu2.jpeg": {
+    "filename": "bilateral_canny_anu2.jpeg",
+    "sides_with_pins": 4,
+    "pins_per_side": [
+      9,
+      13,
+      12,
+      10
+    ],
+    "max_pins_per_side": 13,
+    "total_pins": 52,
+    "side_names": [
+      "top",
+      "right",
+      "bottom",
+      "left"
+    ],
+    "steps": [
+      "Load Canny-edge image.",
+      "Locate non-zero pixels to find package body (no rotation).",
+      "Mask out the largest rectangle (chip body).",
+      "Detect connected pin blobs after body removal.",
+      "Assign pin blobs to sides.",
+      "Compute totals using max-per-active-side rule.",
+      "Saved annotated image to bi_full_annotated/bilateral_canny_anu2.jpeg"
+    ],
+    "side_energy": [
+      9.0,
+      13.0,
+      12.0,
+      10.0
+    ]
+  },
+  "bilateral_canny_anu3.jpeg": {
+    "filename": "bilateral_canny_anu3.jpeg",
+    "sides_with_pins": 4,
+    "pins_per_side": [
+      15,
+      15,
+      8,
+      15
+    ],
+    "max_pins_per_side": 15,
+    "total_pins": 60,
+    "side_names": [
+      "top",
+      "right",
+      "bottom",
+      "left"
+    ],
+    "steps": [
+      "Load Canny-edge image.",
+      "Locate non-zero pixels to find package body (no rotation).",
+      "Mask out the largest rectangle (chip body).",
+      "Detect connected pin blobs after body removal.",
+      "Assign pin blobs to sides.",
+      "Compute totals using max-per-active-side rule.",
+      "Saved annotated image to bi_full_annotated/bilateral_canny_anu3.jpeg"
+    ],
+    "side_energy": [
+      15.0,
+      15.0,
+      8.0,
+      15.0
+    ]
+  },
+  "bilateral_canny_anu4.jpg": {
+    "filename": "bilateral_canny_anu4.jpg",
+    "sides_with_pins": 4,
+    "pins_per_side": [
+      40,
+      31,
+      34,
+      30
+    ],
+    "max_pins_per_side": 40,
+    "total_pins": 160,
+    "side_names": [
+      "top",
+      "right",
+      "bottom",
+      "left"
+    ],
+    "steps": [
+      "Load Canny-edge image.",
+      "Locate non-zero pixels to find package body (no rotation).",
+      "Mask out the largest rectangle (chip body).",
+      "Detect connected pin blobs after body removal.",
+      "Assign pin blobs to sides.",
+      "Compute totals using max-per-active-side rule.",
+      "Saved annotated image to bi_full_annotated/bilateral_canny_anu4.jpg"
+    ],
+    "side_energy": [
+      40.0,
+      31.0,
+      34.0,
+      30.0
+    ]
+  },
+  "bilateral_canny_anu5.jpg": {
+    "filename": "bilateral_canny_anu5.jpg",
+    "sides_with_pins": 2,
+    "pins_per_side": [
+      3,
+      0,
+      0,
+      0
+    ],
+    "max_pins_per_side": 3,
+    "total_pins": 6,
+    "side_names": [
+      "top",
+      "right",
+      "bottom",
+      "left"
+    ],
+    "steps": [
+      "Load Canny-edge image.",
+      "Locate non-zero pixels to find package body (no rotation).",
+      "Mask out the largest rectangle (chip body).",
+      "Detect connected pin blobs after body removal.",
+      "Assign pin blobs to sides.",
+      "Compute totals using max-per-active-side rule.",
+      "Saved annotated image to bi_full_annotated/bilateral_canny_anu5.jpg"
+    ],
+    "side_energy": [
+      3.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "bilateral_canny_anu6.png": {
+    "filename": "bilateral_canny_anu6.png",
+    "sides_with_pins": 4,
+    "pins_per_side": [
+      9,
+      20,
+      12,
+      13
+    ],
+    "max_pins_per_side": 20,
+    "total_pins": 80,
+    "side_names": [
+      "top",
+      "right",
+      "bottom",
+      "left"
+    ],
+    "steps": [
+      "Load Canny-edge image.",
+      "Locate non-zero pixels to find package body (no rotation).",
+      "Mask out the largest rectangle (chip body).",
+      "Detect connected pin blobs after body removal.",
+      "Assign pin blobs to sides.",
+      "Compute totals using max-per-active-side rule.",
+      "Saved annotated image to bi_full_annotated/bilateral_canny_anu6.png"
+    ],
+    "side_energy": [
+      9.0,
+      20.0,
+      12.0,
+      13.0
+    ]
+  },
+  "bilateral_canny_new1.png": {
+    "filename": "bilateral_canny_new1.png",
+    "sides_with_pins": 2,
+    "pins_per_side": [
+      0,
+      0,
+      23,
+      0
+    ],
+    "max_pins_per_side": 23,
+    "total_pins": 46,
+    "side_names": [
+      "top",
+      "right",
+      "bottom",
+      "left"
+    ],
+    "steps": [
+      "Load Canny-edge image.",
+      "Locate non-zero pixels to find package body (no rotation).",
+      "Mask out the largest rectangle (chip body).",
+      "Detect connected pin blobs after body removal.",
+      "Assign pin blobs to sides.",
+      "Compute totals using max-per-active-side rule.",
+      "Saved annotated image to bi_full_annotated/bilateral_canny_new1.png"
+    ],
+    "side_energy": [
+      0.0,
+      0.0,
+      23.0,
+      0.0
+    ]
+  },
+  "bilateral_canny_new2.png": {
+    "filename": "bilateral_canny_new2.png",
+    "sides_with_pins": 4,
+    "pins_per_side": [
+      0,
+      0,
+      2,
+      0
+    ],
+    "max_pins_per_side": 2,
+    "total_pins": 8,
+    "side_names": [
+      "top",
+      "right",
+      "bottom",
+      "left"
+    ],
+    "steps": [
+      "Load Canny-edge image.",
+      "Locate non-zero pixels to find package body (no rotation).",
+      "Mask out the largest rectangle (chip body).",
+      "Detect connected pin blobs after body removal.",
+      "Assign pin blobs to sides.",
+      "Compute totals using max-per-active-side rule.",
+      "Saved annotated image to bi_full_annotated/bilateral_canny_new2.png"
+    ],
+    "side_energy": [
+      0.0,
+      0.0,
+      2.0,
+      0.0
+    ]
+  },
+  "bilateral_canny_new3.png": {
+    "filename": "bilateral_canny_new3.png",
+    "sides_with_pins": 4,
+    "pins_per_side": [
+      7,
+      1,
+      1,
+      21
+    ],
+    "max_pins_per_side": 21,
+    "total_pins": 84,
+    "side_names": [
+      "top",
+      "right",
+      "bottom",
+      "left"
+    ],
+    "steps": [
+      "Load Canny-edge image.",
+      "Locate non-zero pixels to find package body (no rotation).",
+      "Mask out the largest rectangle (chip body).",
+      "Detect connected pin blobs after body removal.",
+      "Assign pin blobs to sides.",
+      "Compute totals using max-per-active-side rule.",
+      "Saved annotated image to bi_full_annotated/bilateral_canny_new3.png"
+    ],
+    "side_energy": [
+      7.0,
+      1.0,
+      1.0,
+      21.0
+    ]
+  },
+  "bilateral_canny_new4.png": {
+    "filename": "bilateral_canny_new4.png",
+    "sides_with_pins": 4,
+    "pins_per_side": [
+      22,
+      12,
+      14,
+      10
+    ],
+    "max_pins_per_side": 22,
+    "total_pins": 88,
+    "side_names": [
+      "top",
+      "right",
+      "bottom",
+      "left"
+    ],
+    "steps": [
+      "Load Canny-edge image.",
+      "Locate non-zero pixels to find package body (no rotation).",
+      "Mask out the largest rectangle (chip body).",
+      "Detect connected pin blobs after body removal.",
+      "Assign pin blobs to sides.",
+      "Compute totals using max-per-active-side rule.",
+      "Saved annotated image to bi_full_annotated/bilateral_canny_new4.png"
+    ],
+    "side_energy": [
+      22.0,
+      12.0,
+      14.0,
+      10.0
+    ]
+  },
+  "bilateral_canny_new5.png": {
+    "filename": "bilateral_canny_new5.png",
+    "sides_with_pins": 2,
+    "pins_per_side": [
+      25,
+      0,
+      11,
+      0
+    ],
+    "max_pins_per_side": 25,
+    "total_pins": 50,
+    "side_names": [
+      "top",
+      "right",
+      "bottom",
+      "left"
+    ],
+    "steps": [
+      "Load Canny-edge image.",
+      "Locate non-zero pixels to find package body (no rotation).",
+      "Mask out the largest rectangle (chip body).",
+      "Detect connected pin blobs after body removal.",
+      "Assign pin blobs to sides.",
+      "Compute totals using max-per-active-side rule.",
+      "Saved annotated image to bi_full_annotated/bilateral_canny_new5.png"
+    ],
+    "side_energy": [
+      25.0,
+      0.0,
+      11.0,
+      0.0
+    ]
+  }
+}

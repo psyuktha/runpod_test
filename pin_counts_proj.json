@@ -1,0 +1,66 @@
+{
+  "bilateral_canny_new2.png": {
+    "filename": "bilateral_canny_new2.png",
+    "sides_with_pins": 4,
+    "pins_per_side": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "max_pins_per_side": 0,
+    "total_pins": 0,
+    "side_names": [
+      "top",
+      "right",
+      "bottom",
+      "left"
+    ],
+    "steps": [
+      "Load Canny-edge image.",
+      "Locate non-zero pixels to find package body (no rotation).",
+      "Define side bands and compute projections.",
+      "Determine active sides by aspect ratio (2 if long, else 4).",
+      "Compute totals: total = max pins on active side * number of active sides.",
+      "Saved annotated image to bi_full_annotated_proj/bilateral_canny_new2.png"
+    ],
+    "side_energy": [
+      0.0,
+      0.0,
+      22695.0,
+      0.0
+    ]
+  },
+  "bilateral_canny_new3.png": {
+    "filename": "bilateral_canny_new3.png",
+    "sides_with_pins": 4,
+    "pins_per_side": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "max_pins_per_side": 0,
+    "total_pins": 0,
+    "side_names": [
+      "top",
+      "right",
+      "bottom",
+      "left"
+    ],
+    "steps": [
+      "Load Canny-edge image.",
+      "Locate non-zero pixels to find package body (no rotation).",
+      "Define side bands and compute projections.",
+      "Determine active sides by aspect ratio (2 if long, else 4).",
+      "Compute totals: total = max pins on active side * number of active sides.",
+      "Saved annotated image to bi_full_annotated_proj/bilateral_canny_new3.png"
+    ],
+    "side_energy": [
+      75480.0,
+      0.0,
+      0.0,
+      93840.0
+    ]
+  }
+}
