@@ -110,23 +110,33 @@ def _side_for_pin(
     pin_bbox: Tuple[int, int, int, int],
     package_bbox: Tuple[int, int, int, int],
 ) -> str:
-    """Classify to the nearest package edge using center-to-edge distance."""
+    """
+    Classify to an edge using bbox center vs an inset package box:
+    - If center is beyond inset band on an axis, pick that side.
+    - Otherwise fall back to nearest edge distance.
+    """
     px_min, py_min, px_max, py_max = package_bbox
+    pw = px_max - px_min + 1
+    ph = py_max - py_min + 1
     cx = (pin_bbox[0] + pin_bbox[2]) / 2
     cy = (pin_bbox[1] + pin_bbox[3]) / 2
+
+    margin_x = 0.05 * pw
+    margin_y = 0.05 * ph
+    if cx <= px_min + margin_x:
+        return "left"
+    if cx >= px_max - margin_x:
+        return "right"
+    if cy <= py_min + margin_y:
+        return "top"
+    if cy >= py_max - margin_y:
+        return "bottom"
 
     d_top = abs(cy - py_min)
     d_bottom = abs(py_max - cy)
     d_left = abs(cx - px_min)
     d_right = abs(px_max - cx)
-
-    distances = {
-        "top": d_top,
-        "bottom": d_bottom,
-        "left": d_left,
-        "right": d_right,
-    }
-    # Pick the side with the minimum distance; ties resolved by name for stability.
+    distances = {"top": d_top, "bottom": d_bottom, "left": d_left, "right": d_right}
     return min(distances.items(), key=lambda kv: (kv[1], kv[0]))[0]
 
 
@@ -252,6 +262,7 @@ def count_pins(
         yellow_side_scores,
         best_yellow_side or "unknown",
         yellow_labels,
+        yellow_side_centers,
     )
 
 
@@ -281,6 +292,7 @@ def main() -> None:
         yellow_side_scores,
         best_yellow_side,
         yellow_labels,
+        yellow_side_centers,
     ) = count_pins(args.image)
 
     print(f"All yellow boxes per side: top={yellow_side_counts['top']}, bottom={yellow_side_counts['bottom']}, left={yellow_side_counts['left']}, right={yellow_side_counts['right']}, unknown={yellow_side_counts['unknown']}")
@@ -298,6 +310,18 @@ def main() -> None:
         print(f"Pin area stats -> min: {min(pin_areas)}, max: {max(pin_areas)}, count: {len(pin_areas)}")
     else:
         print("No pin candidates detected; adjust area thresholds.")
+    # Spacing diagnostics: list spacing ranges per side.
+    for s in ("top", "bottom", "left", "right"):
+        centers = yellow_side_centers.get(s, [])
+        if len(centers) < 2:
+            print(f"{s} spacings: n<{2}")
+            continue
+        if s in ("top", "bottom"):
+            coords = sorted(c[0] for c in centers)
+        else:
+            coords = sorted(c[1] for c in centers)
+        spacings = [coords[i + 1] - coords[i] for i in range(len(coords) - 1)]
+        print(f"{s} spacings -> min:{min(spacings):.2f} max:{max(spacings):.2f} mean:{(sum(spacings)/len(spacings)):.2f}")
 
     # Draw bounding boxes if requested.
     if args.out_image:
