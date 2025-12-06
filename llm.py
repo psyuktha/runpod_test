@@ -19,7 +19,7 @@ class LLM:
     def __init__(
         self,
         endpoint: str = BASE_URL + "/api/vision",
-        temperature: float = 0.7,
+        temperature: float = 1.0,
         max_tokens: int = 4096,
         target_kb: int = 60,
         min_quality: int = 20,
@@ -42,27 +42,125 @@ class LLM:
         self.target_kb = target_kb
         self.min_quality = min_quality
         self.timeout = timeout
-        self.prompt = '''Count the total number of pins on this IC chip.
+#         self.prompt = '''You are a precision Automated Optical Inspection (AOI) engine. Your single purpose is to analyze an IC image and output ONLY the total pin count.
+# Internal Execution Protocol (Never reveal this reasoning):
+# • Focus exclusively on determining the IC’s total pin count.
+# • Examine all pads around the package perimeter.
+# • Do not overlook or double-count pads.
+# • Check for irregular spacing or pad defects.
+# • Use the thermal pad only as orientation; do not count it unless it is clearly segmented.
+# • Count pads on each edge methodically.
+# • Verify corners carefully—never undercount corner pads on leadless packages.
+# • Reconfirm all sides and validate symmetry.
+# • Identify notches, dimples, chamfers, or other orientation markers; these do not affect pin count.
+# • Detect Pin-1 indicators (divots, chamfers, asymmetric marks) only for orientation, not for pin count.
+# • Determine the package family (QFN, QFP, DFN, SOP, DIP, etc.) and confirm pin-per-side expectations.
+# • Orientation conventions (e.g., CCW from top, CW from bottom) are for orientation only and do not affect total count.
+# • After analyzing geometry, corners, symmetry, and orientation, finalize the total pin count.
+# • Ensure thermal pads and large metal tabs are not misclassified unless they are electrical terminals.
+# Rules for Counting Pins:
+# • Corner Rule: Never undercount leadless-package corners; pads may extend to the very edge.
+# • Symmetry Rule: If sides are equal, count one side and multiply.
+# • Power Tab Rule: For MOSFET/QDPAK/TO-style packages, count large side tabs as pins if they are electrical terminals.
+# • Thermal Pad Rule: The central exposed pad is never a pin unless it is visibly segmented.
+# Output Constraint:
+# Return ONLY the final integer pin count.'''
+
+# '''System Role: You are a precision Automated Optical Inspection (AOI) engine.
+
+# Objective: Analyze the image of the Integrated Circuit (IC) and determine the Total Pin Count.
+
+# Execution Protocol (Perform these steps internally):
+
+# Geometry Analysis: Identify the package shape (Square, Rectangular, QFN, SOP, DIP).
+# The "Corner Rule": For leadless packages (QFN/DFN), inspect the absolute corners of the package edge. Pins often extend to the very end. Do not undercount corners.
+# The "Power Tab Rule": For power devices (MOSFETs, QDPAK, TO-style), count large protruding metal side-tabs or heat-tabs as electrical pins.
+# Symmetry: Count one clear side/row and multiply based on the package symmetry.
+# Output Constraint:
+# Return ONLY the final integer. Do not provide text, labels, reasoning, or punctuation.'''
+#       self.prompt = '''Count the total number of pins on this IC chip.
+
+#         self.prompt='''You are an expert in IC package inspection.
+
+# TASK:
+# Count the total number of pins visible in this Canny-edge image of an IC package. 
+# IMAGE DETAILS:
+# - The image shows only edges (Canny output).
+# - Pins appear as repeated line or corner-like edge structures around the chip outline.
+# - Ignore noise, random speckles, internal chip markings, and shadows.
+
+# INSTRUCTIONS:
+# 1. Identify the boundary of the IC body (the central rectangular region).
+# 2. Count only the pin edges that extend outward from the IC boundary.
+# 3. Treat each continuous external protruding edge as ONE pin.
+# 4. Do NOT assume symmetry. Count only what is actually visible.
+# 5. Do NOT infer missing pins or guess based on package type.
+# 6. If some pins are partially visible, still count them if the pin-edge structure exists.
+# 7. Output ONLY the pin count as a single integer. No explanation.
+
+# Your answer:'''
+
+        self.prompt='''You are an expert in semiconductor IC lead-frame inspection.
+
+TASK:
+Count the total number of IC pins visible in the provided pin-isolated edge image.
+
+IMAGE CHARACTERISTICS:
+- The image contains ONLY pin edges extracted with a directional and morphological pipeline.
+- Chip body and background edges have already been removed.
+- Each pin appears as a thin outward-facing line or contour.
+- Ignore any very small noise specks or tiny stray edges.
 
 INSTRUCTIONS:
-Look at the IC package in the image
-Count ONLY the metallic pins/contacts (shiny silver/grey metal)
-Do NOT count: plastic edges, shadows, text, reflections, or mold marks
-Count each pin once at the point where it connects to the IC body
-Do NOT assume symmetry - only count what you can see
-Do NOT use part numbers or labels to guess the count
-
-Answer with ONLY a number. 
-
-Examples of correct answers:
-3
-15
-16
-21
-8
-28
+1. Identify all distinct pin-edge structures around the IC boundary.
+2. Treat each continuous thin line/contour as ONE pin.
+3. Do NOT assume symmetry: count only visible edges.
+4. Do NOT infer or guess missing pins.
+5. Do NOT count noise, dust specks, broken fragments, or internal short lines.
+6. If a pin is split into two segments, count it as ONE pin if they align.
+7. Output ONLY the integer pin count. No text, no explanation.
 
 Your answer:'''
+# '''Count the total number of pins on this IC chip.
+# INSTRUCTIONS:
+# Look at the IC package in the image
+# Count ONLY the metallic pins/contacts (shiny silver/grey metal)
+# Do NOT count: plastic edges, shadows, text, reflections, or mold marks
+# Count each pin once at the point where it connects to the IC body
+# Do NOT use part numbers or labels to guess the count
+
+# Answer with ONLY a number. 
+
+# Your answer:'''
+# WHAT COUNTS AS A PIN:
+# - A small metallic leg / pad / contact located along the outer edges of the package.
+# - Pins are shiny silver/grey features used to solder the chip to a PCB.
+# - Corner pins still count as pins, but must not be double-counted.
+
+# RULES:
+# 1. Look only at the IC body, not the blue background.
+# 2. Count every visible metallic contact on the perimeter of the package.
+# 3. Ignore:
+#    - Plastic edges, body corners and chamfers
+#    - Shadows, highlights, and reflections
+#    - Printed text, logos, dots, or mold marks on the top surface
+# 4. For QFP/QFN/SOIC-style packages:
+#    - Pins are evenly spaced along each side.
+#    - If the whole chip and all four sides are clearly visible and look identical in style, you may:
+#      (a) carefully count the pins on one side, then
+#      (b) multiply by the number of similar sides (usually 4) to get the total.
+#    - Do NOT skip pins or group them; each small metal pad along an edge counts as one pin.
+# 5. If any side is cropped, obscured, or looks different, count the pins on each visible side individually.
+# 6. Do NOT:
+#    - Assume a number from the part code
+#    - Guess a common package size without checking the actual visible pins
+#    - Output words or explanations
+
+# OUTPUT FORMAT:
+# - Return ONLY the total number of pins as an integer.
+# - No words, no units, no extra text.
+
+# Your answer:"""
 
 
 
@@ -142,6 +240,7 @@ Your answer:'''
         Returns:
             Dict with "manufacturer" and "pin_count" keys.
         """
+        return response_text
         result = {"manufacturer": "", "pin_count": ""}
 
         if not response_text:
@@ -241,43 +340,72 @@ Your answer:'''
         response_text = response.text
         result = self._parse_response(response_text)
 
-        return result['pin_count']
+        return result
     
-def main():
+def main(img_path: str = None):
     c=0
-    # truth_values =[64,56,20,48,14,48,14,48,48,22,14]
-    truth_values =[16,3,40,3,10,16,3,3,8,16,16,16]
-    truth=[]
+    ground_truth={
+    "anu1.jpeg": 64,
+    "anu2.jpeg": 56,
+    "anu3.jpeg": 20,
+    "anu4.jpg": 48,
+    "anu5.jpg": 14,
+    "anu6.png": 48,
+    "new1.png": 14,
+    "new2.png": 48,
+    "new3.png": 48,
+    "new4.png": 22,
+    "new5.png": 14
+}
+#     ground_truth={
+#     "001.png": 22,
+#     "002.png": 40,
+#     "003.png": 56,
+#     "004.png": 22,
+#     "005.png": 14,
+#     "006.png": 52,
+#     "007.png": 14,
+#     "008.png": 16,
+#     "009.png": 8,
+#     "010.png": 16
+# }
+
+
+    # truth_values =[16,3,40,3,10,16,3,3,8,16,16,16]
+
+    #retry_img
+    # truth_values =[22,40,56,22,14,52,14,16,8,16]
+    truth={}
     llm_client = LLM()
-    test_imges=os.listdir("ic_test")
+    test_imges=os.listdir(img_path)
     test_imges.sort()
     print("Test images:", test_imges)
     for test_img in test_imges:
-        if not test_img.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+        if not test_img.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')) :
             continue
-        image_path = os.path.join("ic_test", test_img)  # Replace with your test image path
+        image_path = os.path.join(img_path, test_img)  # Replace with your test image path
         result = llm_client.analyze_image(image_path)
         print(image_path,"\n","Analysis Result:", result)
-        if result==str(truth_values[c]):
-            print("Correct")
-            truth.append("Correct")
-        else:
-            print("Incorrect. Truth:",truth_values[c])
-            truth.append("Incorrect")
+        # if str(ground_truth[test_img])==str(result):
+        #     truth[test_img] = "Correct"
+        #     print("Ground Truth:",ground_truth[test_img],"| LLM Result:",result,"--> Correct")
+        # else:
+        #     truth[test_img] = "Incorrect"
+        #     print("Ground Truth:",ground_truth[test_img],"| LLM Result:",result,"--> Incorrect")
 
-        print("-----------------------")
+        # print("-----------------------")
         c+=1
-    print("Final Truth List:",truth)
-    print(truth.count("Correct"),"out of",len(truth))
-    for i in range(len(truth)):
-        if truth[i]=="Incorrect":
-            print(f"Image: {test_imges[i]}, Result: {truth[i]}")
+    
 
 
 def individual(img_path):
     llm_client = LLM()
     result = llm_client.analyze_image(img_path)
     print("Analysis Result:", result)
+
 if __name__ == "__main__":
-    # main()
-    individual("ic_test/a5.png")
+    # main("uncertain")  # Specify the directory containing test images
+    # individual("•0000000000.png")
+    # individual("uncertain/new2.png")
+    # individual("retry_img/006.png")
+    main("pin_edges")
