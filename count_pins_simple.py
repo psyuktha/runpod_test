@@ -77,6 +77,19 @@ def count_pins(image_path: str, output_path: str = None):
     print(f"\nTop candidate areas: {sorted([a for _, _, _, _, a in top_raw])}")
     print(f"Bottom candidate areas: {sorted([a for _, _, _, _, a in bottom_raw])}")
 
+    def filter_by_horizontal_line(pins, y_tolerance=30):
+        """Keep only pins aligned on the same horizontal line (median y)."""
+        if len(pins) < 2:
+            return pins
+        
+        # Find median y-center
+        y_centers = [p[1] + p[3] / 2.0 for p in pins]
+        median_y = float(np.median(y_centers))
+        
+        # Keep only pins within tolerance of median
+        aligned = [p for p in pins if abs((p[1] + p[3] / 2.0) - median_y) < y_tolerance]
+        return aligned
+
     def dedupe_by_x(pins, min_dist=30):
         """De-duplicate pins that are too close horizontally."""
         if not pins:
@@ -94,8 +107,16 @@ def count_pins(image_path: str, output_path: str = None):
                     result[-1] = p
         return result
 
-    top_pins = dedupe_by_x(top_raw)
-    bottom_pins = dedupe_by_x(bottom_raw)
+    # First filter by horizontal alignment, then dedupe
+    top_aligned = filter_by_horizontal_line(top_raw)
+    bottom_aligned = filter_by_horizontal_line(bottom_raw)
+    
+    print(f"\nAfter horizontal alignment filter:")
+    print(f"  Top aligned: {len(top_aligned)} (was {len(top_raw)})")
+    print(f"  Bottom aligned: {len(bottom_aligned)} (was {len(bottom_raw)})")
+
+    top_pins = dedupe_by_x(top_aligned)
+    bottom_pins = dedupe_by_x(bottom_aligned)
 
     # Use symmetry: take the max of top/bottom and assume IC is symmetric
     detected_top = len(top_pins)
