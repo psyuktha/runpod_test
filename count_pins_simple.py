@@ -23,27 +23,26 @@ def count_pins(image_path: str, output_path: str = None):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     h, w = gray.shape
 
+    # Mask the center part (IC body) to avoid false detections
+    # Keep only top and bottom bands where pins are located
+    mask_top = int(h * 0.35)      # Top 35% for top pins
+    mask_bottom = int(h * 0.65)   # Bottom 35% for bottom pins
+
+    masked_gray = gray.copy()
+    masked_gray[mask_top:mask_bottom, :] = 0  # Black out center
+
     # Very permissive threshold
-    _, binary = cv2.threshold(gray, 5, 255, cv2.THRESH_BINARY)
+    _, binary = cv2.threshold(masked_gray, 5, 255, cv2.THRESH_BINARY)
 
-    # Find contours
+    # Find contours only in pin regions
     contours, _ = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-
-    # Find the IC body bounds by looking for the largest contour
-    # This helps us identify where pins are (outside the body)
-    all_boxes = []
-    for cnt in contours:
-        x, y, bw, bh = cv2.boundingRect(cnt)
-        all_boxes.append((x, y, bw, bh, bw * bh))
-
-    # Sort by area to find body-like regions
-    all_boxes.sort(key=lambda b: b[4], reverse=True)
 
     # Estimate IC body center
     body_center_y = h / 2.0
 
     # Collect all potential pin contours
     print(f"\nImage size: {w}x{h}")
+    print(f"Center masked: y={mask_top} to y={mask_bottom}")
     print(f"Total contours found: {len(contours)}")
 
     all_candidates = []

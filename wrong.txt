@@ -6,3 +6,6 @@ b7 - 14 issue
 
 annotate_mask_pins - square
 count_pins - lqfn
+cd /Users/yuktha/Documents/runpod_test
+env PYENV_VERSION=system python3 count_pins_simple.py square/chetan_07_edges.png debug/chetan_pins.png
+dip
